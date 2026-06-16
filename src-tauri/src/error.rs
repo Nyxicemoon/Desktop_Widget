@@ -7,6 +7,8 @@ pub enum AppError {
     Database(String),
     #[error("io error: {0}")]
     Io(String),
+    // Part of the app-wide error taxonomy; first constructed in M1 (e.g. todo lookups).
+    #[allow(dead_code)]
     #[error("not found: {0}")]
     NotFound(String),
     #[error("{0}")]
