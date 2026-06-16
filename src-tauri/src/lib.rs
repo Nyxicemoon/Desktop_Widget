@@ -17,7 +17,13 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::kv::kv_get,
-            commands::kv::kv_set
+            commands::kv::kv_set,
+            commands::todos::todo_create,
+            commands::todos::todo_update,
+            commands::todos::todo_delete,
+            commands::todos::todo_list_today,
+            commands::todos::todo_toggle_done,
+            commands::game::game_get_profile
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
