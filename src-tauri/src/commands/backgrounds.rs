@@ -1,5 +1,5 @@
 use crate::config;
-use crate::db::{backgrounds, Db};
+use crate::db::{backgrounds, kv, Db};
 use crate::error::{AppError, AppResult};
 use crate::models::{CurrentBackground, PhotoResult};
 use crate::pexels;
@@ -68,7 +68,16 @@ pub async fn bg_download_and_set(
         Some("Pexels License"),
         Some(&keyword),
     )?;
-    backgrounds::set_current(&mut conn, id)
+    backgrounds::set_current(&mut conn, id)?;
+
+    // Save the user's original wallpaper once, so "restore" can revert later.
+    if kv::get(&conn, "wallpaper.original")?.is_none() {
+        if let Ok(orig) = crate::system::get_wallpaper() {
+            let _ = kv::set(&conn, "wallpaper.original", &orig);
+        }
+    }
+    drop(conn);
+    crate::system::set_wallpaper(&dest)
 }
 
 #[tauri::command]
@@ -90,5 +99,11 @@ pub fn bg_get_current(app: AppHandle, db: State<Db>) -> AppResult<Option<Current
 #[tauri::command]
 pub fn bg_restore_default(db: State<Db>) -> AppResult<()> {
     let conn = db.0.lock().map_err(|e| AppError::Other(e.to_string()))?;
-    backgrounds::restore_default(&conn)
+    backgrounds::restore_default(&conn)?;
+    let original = kv::get(&conn, "wallpaper.original")?;
+    drop(conn);
+    if let Some(path) = original {
+        let _ = crate::system::set_wallpaper(std::path::Path::new(&path));
+    }
+    Ok(())
 }
