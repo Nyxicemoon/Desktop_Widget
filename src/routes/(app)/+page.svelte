@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { coins } from "$lib/stores/game";
+  import { widgetSetVisible, widgetGetVisibility } from "$lib/api";
   import {
     todos,
     loadTodos,
@@ -14,10 +15,21 @@
   let editingId = $state<number | null>(null);
   let editingTitle = $state("");
   let reward = $state(0);
+  let widgetTodo = $state(false);
+  let widgetCoins = $state(false);
 
-  onMount(() => {
+  onMount(async () => {
     void loadTodos();
+    const v = await widgetGetVisibility();
+    widgetTodo = v.todo;
+    widgetCoins = v.coins;
   });
+
+  async function toggleWidget(kind: "todo" | "coins", on: boolean) {
+    await widgetSetVisible(kind, on);
+    if (kind === "todo") widgetTodo = on;
+    else widgetCoins = on;
+  }
 
   async function submitNew(e: Event) {
     e.preventDefault();
@@ -54,6 +66,25 @@
 
 <main class="container">
   <h1>DeskHub</h1>
+
+  <section class="widgets">
+    <label>
+      <input
+        type="checkbox"
+        checked={widgetTodo}
+        onchange={(e) => toggleWidget("todo", e.currentTarget.checked)}
+      />
+      桌面 Todo 组件 / Todo widget
+    </label>
+    <label>
+      <input
+        type="checkbox"
+        checked={widgetCoins}
+        onchange={(e) => toggleWidget("coins", e.currentTarget.checked)}
+      />
+      桌面金币组件 / Coins widget
+    </label>
+  </section>
 
   {#if reward > 0}
     <div class="reward">+{reward}🪙</div>
@@ -189,5 +220,20 @@
   .empty {
     justify-content: center;
     opacity: 0.6;
+  }
+
+  .widgets {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin: 0.5rem 0 1rem;
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+
+  .widgets label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
   }
 </style>
