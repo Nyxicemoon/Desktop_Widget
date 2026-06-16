@@ -28,3 +28,15 @@ Tauri v2 (desktop shell) + Svelte + TypeScript (frontend) + Rust (backend/system
 - `npm run check` — Svelte/TS type-check (svelte-check)
 - `cargo test` — Rust tests (run inside `src-tauri/`)
 - `cargo clippy` — Rust lints (run inside `src-tauri/`)
+
+## Git / PR Workflow
+
+- Remote: `origin` → https://github.com/Nyxicemoon/Desktop_Widget (public, MIT). Default branch: **`main`**.
+- **Never commit or push directly to `main`.** Every change goes through a pull request.
+- Per feature/milestone:
+  1. Branch from up-to-date `main` (e.g. `m4-icons`, `fix-xyz`).
+  2. Commit per task (TDD: keep `cargo test` / `cargo clippy -- -D warnings` / `npm run check` green before each commit).
+  3. Push the branch, open a PR with `gh pr create`.
+  4. Merge after review (`gh pr merge --squash --delete-branch`), then `git checkout main && git pull`.
+- Use the **`gh` CLI** for all GitHub-platform operations (PRs, issues, releases, repo settings). `gh` is installed at `C:\Program Files\GitHub CLI\gh.exe`; if not on `PATH` in a fresh shell, call it by full path. Authenticated as `Nyxicemoon`.
+- Roadmap milestones are tracked as GitHub issues: M4 = [#1](https://github.com/Nyxicemoon/Desktop_Widget/issues/1), M5 = [#2](https://github.com/Nyxicemoon/Desktop_Widget/issues/2), M6 = [#3](https://github.com/Nyxicemoon/Desktop_Widget/issues/3). Reference the issue in the PR (e.g. `Closes #1`).
