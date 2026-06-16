@@ -7,7 +7,7 @@
     bgDownloadAndSet,
     type PhotoResult,
   } from "$lib/api";
-  import { loadBackground, clearBackground } from "$lib/stores/background";
+  import { clearBackground } from "$lib/stores/background";
 
   const presets = ["森林", "雪山", "湖泊", "海边", "星空"];
 
@@ -52,8 +52,7 @@
     message = "";
     try {
       await bgDownloadAndSet(photo, keyword);
-      await loadBackground();
-      message = "已设为背景 / Set as background";
+      message = "已设为壁纸 / Set as wallpaper";
     } catch (e) {
       message = `设置失败 / Failed: ${e}`;
     } finally {

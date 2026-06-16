@@ -2,20 +2,14 @@
   import { onMount } from "svelte";
   import { theme, initTheme, toggleTheme } from "$lib/stores/theme";
   import { coins, refreshCoins } from "$lib/stores/game";
-  import { currentBg, loadBackground } from "$lib/stores/background";
 
   let { children } = $props();
 
   onMount(() => {
     void initTheme();
     void refreshCoins();
-    void loadBackground();
   });
 </script>
-
-{#if $currentBg}
-  <div class="bg-layer" style:background-image={`url(${$currentBg.data_url})`}></div>
-{/if}
 
 <div class="app-shell">
   <header class="bar">
