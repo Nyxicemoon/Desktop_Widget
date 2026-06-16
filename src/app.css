@@ -15,9 +15,15 @@
 html,
 body {
   margin: 0;
-  background: var(--bg);
+  background: transparent;
   color: var(--fg);
   font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.app-shell {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--fg);
   transition:
     background 0.2s,
     color 0.2s;
