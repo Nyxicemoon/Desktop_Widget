@@ -1,6 +1,7 @@
 pub mod game;
 pub mod kv;
 pub mod migrations;
+pub mod todos;
 
 use crate::error::{AppError, AppResult};
 use rusqlite::Connection;
