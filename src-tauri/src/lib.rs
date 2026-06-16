@@ -4,6 +4,7 @@ mod db;
 mod error;
 mod models;
 mod pexels;
+mod reminder;
 mod system;
 mod tray;
 mod window;
@@ -49,6 +50,7 @@ pub fn run() {
             }
 
             tray::create(app.handle())?;
+            reminder::spawn_loop(app.handle().clone());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
