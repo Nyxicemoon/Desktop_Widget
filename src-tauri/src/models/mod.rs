@@ -28,3 +28,35 @@ pub struct ToggleResult {
     pub awarded: i64,
     pub coins: i64,
 }
+
+use serde::Deserialize;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct PhotoResult {
+    pub id: i64,
+    pub source_url: String,
+    pub author: String,
+    pub author_url: String,
+    pub thumb_url: String,
+    pub download_url: String,
+    pub alt: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct Background {
+    pub id: i64,
+    pub local_path: String,
+    pub source_url: String,
+    pub author: Option<String>,
+    pub license: Option<String>,
+    pub keyword: Option<String>,
+    pub is_current: bool,
+    pub created_at: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct CurrentBackground {
+    pub data_url: String,
+    pub source_url: String,
+    pub author: Option<String>,
+}
