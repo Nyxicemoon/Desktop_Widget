@@ -21,6 +21,7 @@ pub fn open(app: &AppHandle) -> AppResult<Connection> {
         .app_data_dir()
         .map_err(|e| AppError::Io(e.to_string()))?;
     std::fs::create_dir_all(&dir)?;
+    backup::apply_pending_import(&dir)?;
     let mut conn = Connection::open(dir.join("deskhub.db"))?;
     migrations::apply(&mut conn)?;
     Ok(conn)
