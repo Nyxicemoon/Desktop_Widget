@@ -7,6 +7,8 @@ pub enum AppError {
     Database(String),
     #[error("io error: {0}")]
     Io(String),
+    #[error("network error: {0}")]
+    Network(String),
     // Part of the app-wide error taxonomy; first constructed in M1 (e.g. todo lookups).
     #[allow(dead_code)]
     #[error("not found: {0}")]
@@ -22,6 +24,7 @@ impl AppError {
         match self {
             AppError::Database(_) => "Database",
             AppError::Io(_) => "Io",
+            AppError::Network(_) => "Network",
             AppError::NotFound(_) => "NotFound",
             AppError::Other(_) => "Other",
         }
