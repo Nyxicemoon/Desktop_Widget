@@ -16,6 +16,7 @@
     <nav>
       <a href="/">待办 / Todos</a>
       <a href="/backgrounds">背景 / Backgrounds</a>
+      <a href="/settings">设置 / Settings</a>
     </nav>
     <span class="grow"></span>
     <span class="coins">🪙 {$coins}</span>
