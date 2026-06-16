@@ -60,3 +60,9 @@ pub struct CurrentBackground {
     pub source_url: String,
     pub author: Option<String>,
 }
+
+#[derive(Debug, Serialize)]
+pub struct WidgetVisibility {
+    pub todo: bool,
+    pub coins: bool,
+}

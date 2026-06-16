@@ -5,6 +5,7 @@ mod error;
 mod models;
 mod pexels;
 mod system;
+mod window;
 
 use tauri::Manager;
 
