@@ -3,6 +3,7 @@ mod config;
 mod db;
 mod error;
 mod models;
+mod pexels;
 mod system;
 
 use tauri::Manager;
