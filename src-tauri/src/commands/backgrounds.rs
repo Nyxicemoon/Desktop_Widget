@@ -13,6 +13,19 @@ fn data_dir(app: &AppHandle) -> AppResult<PathBuf> {
         .map_err(|e| AppError::Io(e.to_string()))
 }
 
+/// Primary monitor resolution in physical pixels; falls back to 1920x1080.
+fn monitor_size(app: &AppHandle) -> (u32, u32) {
+    if let Some(win) = app.get_webview_window("main") {
+        if let Ok(Some(monitor)) = win.primary_monitor() {
+            let size = monitor.size();
+            if size.width > 0 && size.height > 0 {
+                return (size.width, size.height);
+            }
+        }
+    }
+    (1920, 1080)
+}
+
 #[tauri::command]
 pub fn config_has_key(app: AppHandle) -> AppResult<bool> {
     let cfg = config::load(&data_dir(&app)?)?;
@@ -38,7 +51,9 @@ pub async fn bg_search(app: AppHandle, keyword: String) -> AppResult<Vec<PhotoRe
         .pexels_api_key
         .filter(|k| !k.is_empty())
         .ok_or_else(|| AppError::Other("Pexels API key not set".into()))?;
-    tauri::async_runtime::spawn_blocking(move || pexels::search(&keyword, &key))
+    let (w, h) = monitor_size(&app);
+    let orientation = if w >= h { "landscape" } else { "portrait" }.to_string();
+    tauri::async_runtime::spawn_blocking(move || pexels::search(&keyword, &key, &orientation))
         .await
         .map_err(|e| AppError::Other(e.to_string()))?
 }
@@ -53,7 +68,8 @@ pub async fn bg_download_and_set(
     let dest = data_dir(&app)?
         .join("backgrounds")
         .join(format!("{}.jpg", photo.id));
-    let url = photo.download_url.clone();
+    let (w, h) = monitor_size(&app);
+    let url = pexels::sized_url(&photo.download_url, w, h);
     let dest_for_dl = dest.clone();
     tauri::async_runtime::spawn_blocking(move || pexels::download(&url, &dest_for_dl))
         .await
