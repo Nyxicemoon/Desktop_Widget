@@ -118,3 +118,16 @@ export function bgGetCurrent(): Promise<CurrentBackground | null> {
 export function bgRestoreDefault(): Promise<void> {
   return call<void>("bg_restore_default");
 }
+
+export interface WidgetVisibility {
+  todo: boolean;
+  coins: boolean;
+}
+
+export function widgetSetVisible(kind: "todo" | "coins", visible: boolean): Promise<void> {
+  return call<void>("widget_set_visible", { kind, visible });
+}
+
+export function widgetGetVisibility(): Promise<WidgetVisibility> {
+  return call<WidgetVisibility>("widget_get_visibility");
+}
