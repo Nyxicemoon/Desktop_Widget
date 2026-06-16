@@ -43,6 +43,28 @@ mod tests {
     }
 
     #[test]
+    fn value_persists_across_reopen() {
+        // Mirrors the "theme persists across app restart" acceptance criterion:
+        // write to a real file, drop the connection (app close), reopen (app restart), read back.
+        let path = std::env::temp_dir().join(format!("deskhub_persist_{}.db", std::process::id()));
+        let _ = std::fs::remove_file(&path);
+
+        {
+            let mut conn = Connection::open(&path).unwrap();
+            migrations::apply(&mut conn).unwrap();
+            set(&conn, "theme", "dark").unwrap();
+        } // connection dropped == app closed
+
+        {
+            let mut conn = Connection::open(&path).unwrap();
+            migrations::apply(&mut conn).unwrap(); // idempotent on restart
+            assert_eq!(get(&conn, "theme").unwrap(), Some("dark".to_string()));
+        }
+
+        std::fs::remove_file(&path).ok();
+    }
+
+    #[test]
     fn set_overwrites_value_and_keeps_single_row() {
         let conn = setup();
         set(&conn, "theme", "light").unwrap();
