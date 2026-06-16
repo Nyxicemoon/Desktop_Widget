@@ -5,9 +5,9 @@ use crate::window;
 use tauri::{AppHandle, State};
 
 #[tauri::command]
-pub fn widget_set_visible(
+pub async fn widget_set_visible(
     app: AppHandle,
-    db: State<Db>,
+    db: State<'_, Db>,
     kind: String,
     visible: bool,
 ) -> AppResult<()> {
