@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { coins } from "$lib/stores/game";
-  import { widgetSetVisible, widgetGetVisibility } from "$lib/api";
+  import { widgetSetVisible, widgetGetVisibility, sendTestNotification } from "$lib/api";
   import {
     todos,
     loadTodos,
@@ -84,6 +84,9 @@
       />
       桌面金币组件 / Coins widget
     </label>
+    <button class="notify-btn" onclick={() => sendTestNotification()}>
+      🔔 发送测试通知 / Send test notification
+    </button>
   </section>
 
   {#if reward > 0}
@@ -235,5 +238,10 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
+  }
+
+  .notify-btn {
+    align-self: flex-start;
+    margin-top: 0.3rem;
   }
 </style>

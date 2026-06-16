@@ -1,4 +1,9 @@
 import { invoke } from "@tauri-apps/api/core";
+import {
+  isPermissionGranted,
+  requestPermission,
+  sendNotification,
+} from "@tauri-apps/plugin-notification";
 
 export interface AppErrorShape {
   kind: string;
@@ -130,4 +135,14 @@ export function widgetSetVisible(kind: "todo" | "coins", visible: boolean): Prom
 
 export function widgetGetVisibility(): Promise<WidgetVisibility> {
   return call<WidgetVisibility>("widget_get_visibility");
+}
+
+export async function sendTestNotification(): Promise<void> {
+  let granted = await isPermissionGranted();
+  if (!granted) {
+    granted = (await requestPermission()) === "granted";
+  }
+  if (granted) {
+    sendNotification({ title: "DeskHub", body: "测试通知 / Test notification" });
+  }
 }
