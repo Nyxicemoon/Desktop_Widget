@@ -17,6 +17,21 @@ pub fn run() {
         .setup(|app| {
             let conn = db::open(app.handle())?;
             app.manage(db::Db(std::sync::Mutex::new(conn)));
+
+            let vis = {
+                let state = app.state::<db::Db>();
+                let conn = state.0.lock().map_err(|e| e.to_string())?;
+                window::read_visibility(&conn).unwrap_or(crate::models::WidgetVisibility {
+                    todo: false,
+                    coins: false,
+                })
+            };
+            if vis.todo {
+                let _ = window::open_widget(app.handle(), "todo");
+            }
+            if vis.coins {
+                let _ = window::open_widget(app.handle(), "coins");
+            }
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -33,7 +48,9 @@ pub fn run() {
             commands::backgrounds::bg_search,
             commands::backgrounds::bg_download_and_set,
             commands::backgrounds::bg_get_current,
-            commands::backgrounds::bg_restore_default
+            commands::backgrounds::bg_restore_default,
+            commands::widget::widget_set_visible,
+            commands::widget::widget_get_visibility
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
