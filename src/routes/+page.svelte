@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { theme, initTheme, toggleTheme } from "$lib/stores/theme";
-  import { coins, refreshCoins } from "$lib/stores/game";
+  import { coins } from "$lib/stores/game";
   import {
     todos,
     loadTodos,
@@ -17,9 +16,7 @@
   let reward = $state(0);
 
   onMount(() => {
-    void initTheme();
     void loadTodos();
-    void refreshCoins();
   });
 
   async function submitNew(e: Event) {
@@ -54,13 +51,6 @@
     }
   }
 </script>
-
-<header class="bar">
-  <span class="coins">🪙 {$coins}</span>
-  <button class="ghost" onclick={toggleTheme} title="主题 / Theme">
-    {$theme === "dark" ? "🌙" : "☀️"}
-  </button>
-</header>
 
 <main class="container">
   <h1>DeskHub</h1>
@@ -106,18 +96,6 @@
 </main>
 
 <style>
-  .bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.5rem 1rem;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .coins {
-    font-weight: 600;
-  }
-
   .container {
     max-width: 640px;
     margin: 0 auto;
