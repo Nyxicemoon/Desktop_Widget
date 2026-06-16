@@ -5,6 +5,7 @@ mod error;
 mod models;
 mod pexels;
 mod system;
+mod tray;
 mod window;
 
 use tauri::Manager;
@@ -14,6 +15,15 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_window_state::Builder::default().build())
+        .plugin(tauri_plugin_notification::init())
+        .on_window_event(|window, event| {
+            if window.label() == "main" {
+                if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                    api.prevent_close();
+                    let _ = window.hide();
+                }
+            }
+        })
         .setup(|app| {
             let conn = db::open(app.handle())?;
             app.manage(db::Db(std::sync::Mutex::new(conn)));
@@ -32,6 +42,8 @@ pub fn run() {
             if vis.coins {
                 let _ = window::open_widget(app.handle(), "coins");
             }
+
+            tray::create(app.handle())?;
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
