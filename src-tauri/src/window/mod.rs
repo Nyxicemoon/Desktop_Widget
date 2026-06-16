@@ -1,4 +1,4 @@
-use crate::db::kv;
+use crate::db::{kv, Db};
 use crate::error::{AppError, AppResult};
 use crate::models::WidgetVisibility;
 use rusqlite::Connection;
@@ -44,9 +44,25 @@ pub fn open_widget(app: &AppHandle, kind: &str) -> AppResult<()> {
 pub fn close_widget(app: &AppHandle, kind: &str) -> AppResult<()> {
     let (label, ..) = widget_config(kind)?;
     if let Some(win) = app.get_webview_window(label) {
-        win.close().map_err(|e| AppError::Other(e.to_string()))?;
+        win.hide().map_err(|e| AppError::Other(e.to_string()))?;
     }
     Ok(())
+}
+
+/// Open or hide a widget and persist its visibility to kv. Shared by command + tray.
+pub fn set_widget_visible(app: &AppHandle, kind: &str, visible: bool) -> AppResult<()> {
+    if visible {
+        open_widget(app, kind)?;
+    } else {
+        close_widget(app, kind)?;
+    }
+    let state = app.state::<Db>();
+    let conn = state.0.lock().map_err(|e| AppError::Other(e.to_string()))?;
+    kv::set(
+        &conn,
+        &format!("widget.{kind}.visible"),
+        if visible { "1" } else { "0" },
+    )
 }
 
 #[cfg(target_os = "windows")]
