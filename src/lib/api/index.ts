@@ -78,3 +78,43 @@ export function todoToggleDone(id: number): Promise<ToggleResult> {
 export function gameGetProfile(): Promise<GameProfile> {
   return call<GameProfile>("game_get_profile");
 }
+
+export interface PhotoResult {
+  id: number;
+  source_url: string;
+  author: string;
+  author_url: string;
+  thumb_url: string;
+  download_url: string;
+  alt: string;
+}
+
+export interface CurrentBackground {
+  data_url: string;
+  source_url: string;
+  author: string | null;
+}
+
+export function configHasKey(): Promise<boolean> {
+  return call<boolean>("config_has_key");
+}
+
+export function configSetPexelsKey(key: string): Promise<void> {
+  return call<void>("config_set_pexels_key", { key });
+}
+
+export function bgSearch(keyword: string): Promise<PhotoResult[]> {
+  return call<PhotoResult[]>("bg_search", { keyword });
+}
+
+export function bgDownloadAndSet(photo: PhotoResult, keyword: string): Promise<void> {
+  return call<void>("bg_download_and_set", { photo, keyword });
+}
+
+export function bgGetCurrent(): Promise<CurrentBackground | null> {
+  return call<CurrentBackground | null>("bg_get_current");
+}
+
+export function bgRestoreDefault(): Promise<void> {
+  return call<void>("bg_restore_default");
+}
