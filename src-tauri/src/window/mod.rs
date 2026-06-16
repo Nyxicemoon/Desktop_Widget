@@ -4,11 +4,11 @@ use crate::models::WidgetVisibility;
 use rusqlite::Connection;
 use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 
-/// (window label, frontend route, default width, default height)
-pub fn widget_config(kind: &str) -> AppResult<(&'static str, &'static str, f64, f64)> {
+/// (window label, frontend route, width, height, default x, default y)
+pub fn widget_config(kind: &str) -> AppResult<(&'static str, &'static str, f64, f64, f64, f64)> {
     match kind {
-        "todo" => Ok(("widget-todo", "/widgets/todo", 280.0, 360.0)),
-        "coins" => Ok(("widget-coins", "/widgets/coins", 200.0, 90.0)),
+        "todo" => Ok(("widget-todo", "/widgets/todo", 280.0, 360.0, 40.0, 40.0)),
+        "coins" => Ok(("widget-coins", "/widgets/coins", 200.0, 90.0, 360.0, 40.0)),
         other => Err(AppError::Other(format!("unknown widget kind: {other}"))),
     }
 }
@@ -21,7 +21,7 @@ pub fn read_visibility(conn: &Connection) -> AppResult<WidgetVisibility> {
 }
 
 pub fn open_widget(app: &AppHandle, kind: &str) -> AppResult<()> {
-    let (label, route, w, h) = widget_config(kind)?;
+    let (label, route, w, h, x, y) = widget_config(kind)?;
     if let Some(win) = app.get_webview_window(label) {
         win.show().map_err(|e| AppError::Other(e.to_string()))?;
         pin_to_desktop(&win)?;
@@ -35,14 +35,14 @@ pub fn open_widget(app: &AppHandle, kind: &str) -> AppResult<()> {
         .always_on_top(false)
         .resizable(false)
         .inner_size(w, h)
+        .position(x, y)
         .build()
         .map_err(|e| AppError::Other(e.to_string()))?;
-    pin_to_desktop(&win)?;
-    Ok(())
+    pin_to_desktop(&win)
 }
 
 pub fn close_widget(app: &AppHandle, kind: &str) -> AppResult<()> {
-    let (label, _, _, _) = widget_config(kind)?;
+    let (label, ..) = widget_config(kind)?;
     if let Some(win) = app.get_webview_window(label) {
         win.close().map_err(|e| AppError::Other(e.to_string()))?;
     }
