@@ -25,7 +25,13 @@ pub fn run() {
             commands::todos::todo_delete,
             commands::todos::todo_list_today,
             commands::todos::todo_toggle_done,
-            commands::game::game_get_profile
+            commands::game::game_get_profile,
+            commands::backgrounds::config_has_key,
+            commands::backgrounds::config_set_pexels_key,
+            commands::backgrounds::bg_search,
+            commands::backgrounds::bg_download_and_set,
+            commands::backgrounds::bg_get_current,
+            commands::backgrounds::bg_restore_default
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
