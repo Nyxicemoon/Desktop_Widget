@@ -66,6 +66,8 @@ pub fn run() {
             commands::backgrounds::bg_download_and_set,
             commands::backgrounds::bg_get_current,
             commands::backgrounds::bg_restore_default,
+            commands::backup::db_export,
+            commands::backup::db_import,
             commands::widget::widget_set_visible,
             commands::widget::widget_get_visibility
         ])
