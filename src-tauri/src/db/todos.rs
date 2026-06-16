@@ -105,6 +105,23 @@ pub fn toggle_done(conn: &mut Connection, id: i64) -> AppResult<ToggleResult> {
     })
 }
 
+/// IDs + titles of todos that are due today or overdue and not yet done.
+/// Used by the reminder loop; notification de-dup is handled via kv.
+#[allow(dead_code)]
+pub fn list_due(conn: &Connection) -> AppResult<Vec<(i64, String)>> {
+    let mut stmt = conn.prepare(
+        "SELECT id, title FROM todos
+         WHERE done = 0 AND due_date IS NOT NULL
+           AND date(due_date) <= date('now','localtime')",
+    )?;
+    let rows = stmt.query_map([], |r| Ok((r.get(0)?, r.get(1)?)))?;
+    let mut out = Vec::new();
+    for r in rows {
+        out.push(r?);
+    }
+    Ok(out)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -171,5 +188,44 @@ mod tests {
         assert!(r3.todo.done);
         assert_eq!(r3.awarded, 0);
         assert_eq!(r3.coins, 10);
+    }
+
+    #[test]
+    fn list_due_returns_only_due_and_undone() {
+        let conn = setup();
+        // due today, undone -> included
+        conn.execute(
+            "INSERT INTO todos (title, due_date) VALUES ('due_today', date('now','localtime'))",
+            [],
+        )
+        .unwrap();
+        // overdue, undone -> included
+        conn.execute(
+            "INSERT INTO todos (title, due_date) VALUES ('overdue', date('now','localtime','-2 day'))",
+            [],
+        )
+        .unwrap();
+        // future -> excluded
+        conn.execute(
+            "INSERT INTO todos (title, due_date) VALUES ('future', date('now','localtime','+2 day'))",
+            [],
+        )
+        .unwrap();
+        // due today but done -> excluded
+        conn.execute(
+            "INSERT INTO todos (title, done, due_date) VALUES ('done_due', 1, date('now','localtime'))",
+            [],
+        )
+        .unwrap();
+        // no due_date -> excluded
+        create(&conn, "no_due", None, None).unwrap();
+
+        let due = list_due(&conn).unwrap();
+        let titles: Vec<&str> = due.iter().map(|(_, t)| t.as_str()).collect();
+        assert!(titles.contains(&"due_today"));
+        assert!(titles.contains(&"overdue"));
+        assert!(!titles.contains(&"future"));
+        assert!(!titles.contains(&"done_due"));
+        assert!(!titles.contains(&"no_due"));
     }
 }

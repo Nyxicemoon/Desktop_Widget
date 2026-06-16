@@ -146,3 +146,19 @@ export async function sendTestNotification(): Promise<void> {
     sendNotification({ title: "DeskHub", body: "测试通知 / Test notification" });
   }
 }
+
+export function autostartGet(): Promise<boolean> {
+  return call<boolean>("autostart_get");
+}
+
+export function autostartSet(enabled: boolean): Promise<void> {
+  return call<void>("autostart_set", { enabled });
+}
+
+export function dbExport(dest: string): Promise<void> {
+  return call<void>("db_export", { dest });
+}
+
+export function dbImport(src: string): Promise<void> {
+  return call<void>("db_import", { src });
+}
