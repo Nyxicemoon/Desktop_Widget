@@ -2,6 +2,7 @@ use crate::db::kv;
 use crate::error::{AppError, AppResult};
 use crate::models::WidgetVisibility;
 use rusqlite::Connection;
+use tauri::{AppHandle, Manager, WebviewUrl, WebviewWindow, WebviewWindowBuilder};
 
 /// (window label, frontend route, default width, default height)
 pub fn widget_config(kind: &str) -> AppResult<(&'static str, &'static str, f64, f64)> {
@@ -17,6 +18,66 @@ pub fn read_visibility(conn: &Connection) -> AppResult<WidgetVisibility> {
         todo: kv::get(conn, "widget.todo.visible")?.as_deref() == Some("1"),
         coins: kv::get(conn, "widget.coins.visible")?.as_deref() == Some("1"),
     })
+}
+
+pub fn open_widget(app: &AppHandle, kind: &str) -> AppResult<()> {
+    let (label, route, w, h) = widget_config(kind)?;
+    if let Some(win) = app.get_webview_window(label) {
+        win.show().map_err(|e| AppError::Other(e.to_string()))?;
+        pin_to_desktop(&win)?;
+        return Ok(());
+    }
+    let win = WebviewWindowBuilder::new(app, label, WebviewUrl::App(route.into()))
+        .transparent(true)
+        .decorations(false)
+        .skip_taskbar(true)
+        .shadow(false)
+        .always_on_top(false)
+        .resizable(false)
+        .inner_size(w, h)
+        .build()
+        .map_err(|e| AppError::Other(e.to_string()))?;
+    pin_to_desktop(&win)?;
+    Ok(())
+}
+
+pub fn close_widget(app: &AppHandle, kind: &str) -> AppResult<()> {
+    let (label, _, _, _) = widget_config(kind)?;
+    if let Some(win) = app.get_webview_window(label) {
+        win.close().map_err(|e| AppError::Other(e.to_string()))?;
+    }
+    Ok(())
+}
+
+#[cfg(target_os = "windows")]
+pub fn pin_to_desktop(win: &WebviewWindow) -> AppResult<()> {
+    use windows::Win32::Foundation::HWND;
+    use windows::Win32::UI::WindowsAndMessaging::{
+        GetWindowLongPtrW, SetWindowLongPtrW, SetWindowPos, GWL_EXSTYLE, HWND_BOTTOM,
+        SWP_NOACTIVATE, SWP_NOMOVE, SWP_NOSIZE, WS_EX_NOACTIVATE,
+    };
+    let raw = win.hwnd().map_err(|e| AppError::Other(e.to_string()))?;
+    let hwnd = HWND(raw.0);
+    unsafe {
+        let ex = GetWindowLongPtrW(hwnd, GWL_EXSTYLE);
+        SetWindowLongPtrW(hwnd, GWL_EXSTYLE, ex | (WS_EX_NOACTIVATE.0 as isize));
+        SetWindowPos(
+            hwnd,
+            Some(HWND_BOTTOM),
+            0,
+            0,
+            0,
+            0,
+            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE,
+        )
+        .map_err(|e| AppError::Other(e.to_string()))?;
+    }
+    Ok(())
+}
+
+#[cfg(not(target_os = "windows"))]
+pub fn pin_to_desktop(_win: &WebviewWindow) -> AppResult<()> {
+    Ok(())
 }
 
 #[cfg(test)]
