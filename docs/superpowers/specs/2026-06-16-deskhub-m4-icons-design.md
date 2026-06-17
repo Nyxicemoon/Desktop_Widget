@@ -208,3 +208,42 @@ Win32 代码依赖真实 shell，难做纯单元测试；策略：
 - `routes/(widget)/widgets/apps/+page.svelte`（新）
 - `routes/(app)/+layout.svelte`：导航 + Apps
 - `lib/api/index.ts`：封装
+
+---
+
+## 十一、修订（2026-06-16）：widget 即管理面板
+
+用户明确：图标管理**完全在桌面半透明 widget 内**完成，不要主窗口页。以下**取代**前文相应部分：
+
+**形态**：widget 是一个可拖动移动、**右下角可缩放**的半透明桌面面板；尺寸/位置经 `window-state` 持久化。`window::open_widget` 对 `apps` 设 `resizable(true)`；前端右下角缩放手柄调用 `getCurrentWindow().startResizeDragging("SouthEast")`。
+
+**内容（策展式，取代自动扫描）**：widget 初始为空，仅显示用户**拖入**的应用（`.lnk`/`.exe`）。**不再自动扫描桌面**。
+
+**两种模式**：
+- 普通：点击图标 = 启动。
+- 编辑（角上 ✎ 切换）：每项显示 ✕ 移除、支持**拖拽排序**、双击名称**重命名**。
+
+**数据模型简化（重写 migration v4，未合并未运行，直接改）**：
+```sql
+CREATE TABLE custom_apps (
+  id         INTEGER PRIMARY KEY,
+  name       TEXT NOT NULL,
+  target     TEXT NOT NULL,
+  args       TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+```
+**删除 `app_prefs` 表**（收藏/分类不再需要）。
+
+**后端调整**：
+- `system/shortcuts.rs`：**移除 `scan` 与 `desktop_dirs`**；保留 `parse_lnk`/`resolve_dropped`/`launch`/`icon_data_url`。
+- `models::AppEntry` 简化为 `{ id: i64, name: String, target: String, args: Option<String> }`（启动与取图标均用 `target`）。
+- `db/apps.rs`：`list`(按 sort_order) / `add`(去重+下一个 sort_order) / `remove`(按 id) / `rename`(id,name) / `reorder`(ids 按序写 sort_order)；移除 `merge`/`prefs_map`/`set_favorite`/`set_category`。
+- `commands/apps.rs`：`app_list` / `app_add_dropped` / `app_remove(id)` / `app_rename(id,name)` / `app_reorder(ids)` / `app_icon(path)` / `app_launch(path)`；移除 scan/favorite/category 命令。
+
+**删除**：`routes/(app)/apps/+page.svelte` 与 `+layout.svelte` 的「应用」导航链接（主窗口不再承载图标管理）。
+
+**保留**：托盘「应用 widget」开关、`WidgetVisibility.apps`、widget 显隐持久化。
+
+> 详见实施计划 [m4-widget-rework](../plans/2026-06-16-deskhub-m4-widget-rework.md)。
