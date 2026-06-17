@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { coins } from "$lib/stores/game";
-  import { widgetSetVisible, widgetGetVisibility, sendTestNotification } from "$lib/api";
+  import { onMount, onDestroy } from "svelte";
+  import { coins, gameState, refreshStatus } from "$lib/stores/game";
+  import { widgetSetVisible, widgetGetVisibility, sendTestNotification, gameTakeOfflineEarned } from "$lib/api";
   import {
     todos,
     loadTodos,
@@ -19,6 +19,9 @@
   let widgetCoins = $state(false);
   let widgetApps = $state(false);
   let widgetMail = $state(false);
+  let offlineEarned = $state(0);
+  let showOfflineBanner = $state(false);
+  let statusRefreshInterval: number | null = $state(null);
 
   onMount(async () => {
     void loadTodos();
@@ -27,6 +30,27 @@
     widgetCoins = v.coins;
     widgetApps = v.apps;
     widgetMail = v.mail;
+
+    // Load game status
+    await refreshStatus();
+
+    // Check for offline earnings
+    const earned = await gameTakeOfflineEarned();
+    if (earned > 0) {
+      offlineEarned = earned;
+      showOfflineBanner = true;
+    }
+
+    // Set up 60s refresh interval
+    statusRefreshInterval = window.setInterval(async () => {
+      await refreshStatus();
+    }, 60000);
+  });
+
+  onDestroy(() => {
+    if (statusRefreshInterval !== null) {
+      clearInterval(statusRefreshInterval);
+    }
   });
 
   async function toggleWidget(kind: "todo" | "coins" | "apps" | "mail", on: boolean) {
@@ -72,6 +96,29 @@
 
 <main class="container">
   <h1>DeskHub</h1>
+
+  {#if showOfflineBanner}
+    <div class="offline-banner">
+      <span>🎁 离线获得 {offlineEarned} 金币 / Earned {offlineEarned} coins while away</span>
+      <button class="ghost" onclick={() => (showOfflineBanner = false)}>✕</button>
+    </div>
+  {/if}
+
+  {#if $gameState}
+    <div class="game-panel">
+      <div class="game-header">
+        <span class="level">Lv {$gameState.level}</span>
+        <span class="rate">⚙ {$gameState.rate_per_min}/min</span>
+        <span class="coins">🪙 {$gameState.coins}</span>
+      </div>
+      <div class="exp-bar">
+        <div
+          class="exp-fill"
+          style="width: {($gameState.exp_into_level / $gameState.exp_for_next) * 100}%"
+        ></div>
+      </div>
+    </div>
+  {/if}
 
   <section class="widgets">
     <label>
@@ -160,6 +207,56 @@
 
   h1 {
     text-align: center;
+  }
+
+  .offline-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.7rem 1rem;
+    margin: 0.5rem 0 1rem;
+    font-size: 0.9rem;
+  }
+
+  .game-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 0.5rem 0 1rem;
+  }
+
+  .game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  .level,
+  .rate,
+  .coins {
+    font-weight: 500;
+  }
+
+  .exp-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .exp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #4a9eff, #7c4dff);
+    transition: width 0.3s ease;
   }
 
   .reward {

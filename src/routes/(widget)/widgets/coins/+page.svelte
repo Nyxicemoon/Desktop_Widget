@@ -1,13 +1,28 @@
 <script lang="ts">
-  import { onMount } from "svelte";
-  import { coins, refreshCoins } from "$lib/stores/game";
+  import { onMount, onDestroy } from "svelte";
+  import { coins, gameState, refreshStatus } from "$lib/stores/game";
+
+  let statusRefreshInterval: number | null = null;
 
   onMount(() => {
-    void refreshCoins();
+    void refreshStatus();
+
+    // Set up 60s refresh interval
+    statusRefreshInterval = window.setInterval(async () => {
+      await refreshStatus();
+    }, 60000);
+  });
+
+  onDestroy(() => {
+    if (statusRefreshInterval !== null) {
+      clearInterval(statusRefreshInterval);
+    }
   });
 </script>
 
-<div class="widget" data-tauri-drag-region>🪙 {$coins}</div>
+<div class="widget" data-tauri-drag-region>
+  🪙 {$coins}　Lv {$gameState?.level ?? 1}
+</div>
 
 <style>
   .widget {
