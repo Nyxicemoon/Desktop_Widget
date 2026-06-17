@@ -57,14 +57,8 @@ const MIGRATIONS: &[(i32, &str)] = &[
             name       TEXT NOT NULL,
             target     TEXT NOT NULL,
             args       TEXT,
-            created_at TEXT NOT NULL DEFAULT (datetime('now'))
-        );
-        CREATE TABLE app_prefs (
-            target     TEXT PRIMARY KEY,
-            category   TEXT,
-            favorite   INTEGER NOT NULL DEFAULT 0,
             sort_order INTEGER NOT NULL DEFAULT 0,
-            updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
         );",
     ),
 ];
@@ -97,7 +91,7 @@ mod tests {
         apply(&mut conn).unwrap();
         let latest = MIGRATIONS.last().unwrap().0;
         assert_eq!(version(&conn), latest);
-        for t in ["kv", "todos", "game_profile", "coin_ledger", "backgrounds", "custom_apps", "app_prefs"] {
+        for t in ["kv", "todos", "game_profile", "coin_ledger", "backgrounds", "custom_apps"] {
             let c: i32 = conn
                 .query_row(
                     "SELECT count(*) FROM sqlite_master WHERE type='table' AND name=?1",

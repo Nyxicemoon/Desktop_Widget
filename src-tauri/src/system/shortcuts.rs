@@ -6,6 +6,7 @@
 use crate::error::AppResult;
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct ShortcutRaw {
     pub name: String,
     pub lnk_path: String,
@@ -22,58 +23,6 @@ fn wide(s: &str) -> Vec<u16> {
 fn from_wide(buf: &[u16]) -> String {
     let end = buf.iter().position(|&c| c == 0).unwrap_or(buf.len());
     String::from_utf16_lossy(&buf[..end])
-}
-
-#[cfg(target_os = "windows")]
-fn desktop_dirs() -> Vec<std::path::PathBuf> {
-    let mut dirs = Vec::new();
-    if let Ok(up) = std::env::var("USERPROFILE") {
-        dirs.push(std::path::Path::new(&up).join("Desktop"));
-    }
-    let public = std::env::var("PUBLIC").unwrap_or_else(|_| "C:\\Users\\Public".to_string());
-    dirs.push(std::path::Path::new(&public).join("Desktop"));
-    dirs
-}
-
-/// Scan user + public desktops for `.lnk` shortcuts.
-#[cfg(target_os = "windows")]
-pub fn scan() -> AppResult<Vec<ShortcutRaw>> {
-    let mut out = Vec::new();
-    for dir in desktop_dirs() {
-        let entries = match std::fs::read_dir(&dir) {
-            Ok(e) => e,
-            Err(_) => continue,
-        };
-        for entry in entries.flatten() {
-            let path = entry.path();
-            let is_lnk = path
-                .extension()
-                .and_then(|e| e.to_str())
-                .map(|e| e.eq_ignore_ascii_case("lnk"))
-                .unwrap_or(false);
-            if !is_lnk {
-                continue;
-            }
-            let lnk_path = path.to_string_lossy().to_string();
-            let name = path
-                .file_stem()
-                .map(|s| s.to_string_lossy().to_string())
-                .unwrap_or_else(|| "Unknown".to_string());
-            let (target, args) = parse_lnk(&lnk_path).unwrap_or_default();
-            let target = if target.is_empty() {
-                lnk_path.clone()
-            } else {
-                target
-            };
-            out.push(ShortcutRaw {
-                name,
-                lnk_path,
-                target,
-                args,
-            });
-        }
-    }
-    Ok(out)
 }
 
 /// Resolve a `.lnk` to (target, args). Returns ("", None) on failure.
@@ -303,11 +252,6 @@ pub fn icon_data_url(path: &str) -> AppResult<Option<String>> {
 }
 
 // ----- non-windows stubs -----
-
-#[cfg(not(target_os = "windows"))]
-pub fn scan() -> AppResult<Vec<ShortcutRaw>> {
-    Ok(Vec::new())
-}
 
 #[cfg(not(target_os = "windows"))]
 pub fn resolve_dropped(path: &str) -> AppResult<ShortcutRaw> {

@@ -81,13 +81,13 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
-            commands::apps::apps_scan,
+            commands::apps::app_list,
             commands::apps::app_icon,
             commands::apps::app_launch,
             commands::apps::app_add_dropped,
-            commands::apps::app_remove_custom,
-            commands::apps::app_set_favorite,
-            commands::apps::app_set_category,
+            commands::apps::app_remove,
+            commands::apps::app_rename,
+            commands::apps::app_reorder,
             commands::kv::kv_get,
             commands::kv::kv_set,
             commands::todos::todo_create,
