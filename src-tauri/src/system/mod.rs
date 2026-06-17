@@ -1,5 +1,7 @@
 //! System integration. Wallpaper get/set (tray lives in `tray.rs`).
 
+pub mod shortcuts;
+
 use crate::error::AppResult;
 use std::path::Path;
 

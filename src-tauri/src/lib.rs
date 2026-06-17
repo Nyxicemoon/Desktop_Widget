@@ -57,6 +57,7 @@ pub fn run() {
                 window::read_visibility(&conn).unwrap_or(crate::models::WidgetVisibility {
                     todo: false,
                     coins: false,
+                    apps: false,
                 })
             };
             if vis.todo {
@@ -64,6 +65,9 @@ pub fn run() {
             }
             if vis.coins {
                 let _ = window::open_widget(app.handle(), "coins");
+            }
+            if vis.apps {
+                let _ = window::open_widget(app.handle(), "apps");
             }
 
             tray::create(app.handle())?;
@@ -77,6 +81,13 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            commands::apps::app_list,
+            commands::apps::app_icon,
+            commands::apps::app_launch,
+            commands::apps::app_add_dropped,
+            commands::apps::app_remove,
+            commands::apps::app_rename,
+            commands::apps::app_reorder,
             commands::kv::kv_get,
             commands::kv::kv_set,
             commands::todos::todo_create,

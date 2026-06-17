@@ -127,9 +127,10 @@ export function bgRestoreDefault(): Promise<void> {
 export interface WidgetVisibility {
   todo: boolean;
   coins: boolean;
+  apps: boolean;
 }
 
-export function widgetSetVisible(kind: "todo" | "coins", visible: boolean): Promise<void> {
+export function widgetSetVisible(kind: "todo" | "coins" | "apps", visible: boolean): Promise<void> {
   return call<void>("widget_set_visible", { kind, visible });
 }
 
@@ -161,4 +162,39 @@ export function dbExport(dest: string): Promise<void> {
 
 export function dbImport(src: string): Promise<void> {
   return call<void>("db_import", { src });
+}
+
+export interface AppEntry {
+  id: number;
+  name: string;
+  target: string;
+  args: string | null;
+}
+
+export function appList(): Promise<AppEntry[]> {
+  return call<AppEntry[]>("app_list");
+}
+
+export function appIcon(path: string): Promise<string | null> {
+  return call<string | null>("app_icon", { path });
+}
+
+export function appLaunch(path: string): Promise<void> {
+  return call<void>("app_launch", { path });
+}
+
+export function appAddDropped(path: string): Promise<void> {
+  return call<void>("app_add_dropped", { path });
+}
+
+export function appRemove(id: number): Promise<void> {
+  return call<void>("app_remove", { id });
+}
+
+export function appRename(id: number, name: string): Promise<void> {
+  return call<void>("app_rename", { id, name });
+}
+
+export function appReorder(ids: number[]): Promise<void> {
+  return call<void>("app_reorder", { ids });
 }

@@ -5,6 +5,7 @@
   "windows": ["main", "widget-*"],
   "permissions": [
     "core:default",
+    "core:window:allow-start-resize-dragging",
     "opener:default",
     "notification:default",
     "dialog:default"

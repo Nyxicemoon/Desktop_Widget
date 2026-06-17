@@ -22,7 +22,12 @@ fn spawn_toggle(app: &AppHandle, kind: &'static str) {
                 Err(_) => return,
             };
             window::read_visibility(&guard)
-                .map(|v| if kind == "todo" { v.todo } else { v.coins })
+                .map(|v| match kind {
+                    "todo" => v.todo,
+                    "coins" => v.coins,
+                    "apps" => v.apps,
+                    _ => false,
+                })
                 .unwrap_or(false)
         };
         let _ = window::set_widget_visible(&app, kind, !current);
@@ -33,8 +38,9 @@ pub fn create(app: &AppHandle) -> tauri::Result<()> {
     let show = MenuItem::with_id(app, "show_main", "显示主窗口 / Show", true, None::<&str>)?;
     let todo = MenuItem::with_id(app, "toggle_todo", "Todo 组件", true, None::<&str>)?;
     let coins = MenuItem::with_id(app, "toggle_coins", "金币组件", true, None::<&str>)?;
+    let apps = MenuItem::with_id(app, "toggle_apps", "显示/隐藏 应用 / Toggle Apps", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "退出 / Quit", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&show, &todo, &coins, &quit])?;
+    let menu = Menu::with_items(app, &[&show, &todo, &coins, &apps, &quit])?;
 
     let icon = tauri::image::Image::from_bytes(include_bytes!("../icons/128x128.png"))?;
 
@@ -47,6 +53,7 @@ pub fn create(app: &AppHandle) -> tauri::Result<()> {
             "show_main" => show_main(app),
             "toggle_todo" => spawn_toggle(app, "todo"),
             "toggle_coins" => spawn_toggle(app, "coins"),
+            "toggle_apps" => spawn_toggle(app, "apps"),
             "quit" => app.exit(0),
             _ => {}
         })
