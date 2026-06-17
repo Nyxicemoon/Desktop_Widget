@@ -50,6 +50,23 @@ const MIGRATIONS: &[(i32, &str)] = &[
             created_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
         );",
     ),
+    (
+        4,
+        "CREATE TABLE custom_apps (
+            id         INTEGER PRIMARY KEY,
+            name       TEXT NOT NULL,
+            target     TEXT NOT NULL,
+            args       TEXT,
+            created_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );
+        CREATE TABLE app_prefs (
+            target     TEXT PRIMARY KEY,
+            category   TEXT,
+            favorite   INTEGER NOT NULL DEFAULT 0,
+            sort_order INTEGER NOT NULL DEFAULT 0,
+            updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+        );",
+    ),
 ];
 
 pub fn apply(conn: &mut Connection) -> AppResult<()> {
@@ -80,7 +97,7 @@ mod tests {
         apply(&mut conn).unwrap();
         let latest = MIGRATIONS.last().unwrap().0;
         assert_eq!(version(&conn), latest);
-        for t in ["kv", "todos", "game_profile", "coin_ledger", "backgrounds"] {
+        for t in ["kv", "todos", "game_profile", "coin_ledger", "backgrounds", "custom_apps", "app_prefs"] {
             let c: i32 = conn
                 .query_row(
                     "SELECT count(*) FROM sqlite_master WHERE type='table' AND name=?1",

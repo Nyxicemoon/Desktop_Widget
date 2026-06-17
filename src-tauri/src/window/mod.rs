@@ -17,6 +17,7 @@ pub fn read_visibility(conn: &Connection) -> AppResult<WidgetVisibility> {
     Ok(WidgetVisibility {
         todo: kv::get(conn, "widget.todo.visible")?.as_deref() == Some("1"),
         coins: kv::get(conn, "widget.coins.visible")?.as_deref() == Some("1"),
+        apps: kv::get(conn, "widget.apps.visible")?.as_deref() == Some("1"),
     })
 }
 
@@ -113,6 +114,7 @@ mod tests {
         let v = read_visibility(&conn).unwrap();
         assert!(!v.todo);
         assert!(!v.coins);
+        assert!(!v.apps);
     }
 
     #[test]

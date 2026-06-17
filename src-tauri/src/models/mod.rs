@@ -65,4 +65,16 @@ pub struct CurrentBackground {
 pub struct WidgetVisibility {
     pub todo: bool,
     pub coins: bool,
+    pub apps: bool,
+}
+
+#[derive(Debug, Serialize)]
+pub struct AppEntry {
+    pub name: String,
+    pub launch_path: String,
+    pub target: String,
+    pub args: Option<String>,
+    pub is_custom: bool,
+    pub category: Option<String>,
+    pub favorite: bool,
 }
