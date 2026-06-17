@@ -15,7 +15,6 @@
   <header class="bar">
     <nav>
       <a href="/">待办 / Todos</a>
-      <a href="/apps">应用 / Apps</a>
       <a href="/backgrounds">背景 / Backgrounds</a>
       <a href="/settings">设置 / Settings</a>
     </nav>
