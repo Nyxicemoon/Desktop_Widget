@@ -45,6 +45,15 @@ export interface GameProfile {
   last_tick: string;
 }
 
+export interface GameStatus {
+  coins: number;
+  exp: number;
+  level: number;
+  exp_into_level: number;
+  exp_for_next: number;
+  rate_per_min: number;
+}
+
 export interface ToggleResult {
   todo: Todo;
   awarded: number;
@@ -82,6 +91,14 @@ export function todoToggleDone(id: number): Promise<ToggleResult> {
 
 export function gameGetProfile(): Promise<GameProfile> {
   return call<GameProfile>("game_get_profile");
+}
+
+export function gameStatus(): Promise<GameStatus> {
+  return call<GameStatus>("game_status");
+}
+
+export function gameTakeOfflineEarned(): Promise<number> {
+  return call<number>("game_take_offline_earned");
 }
 
 export interface PhotoResult {

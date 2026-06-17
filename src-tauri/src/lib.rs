@@ -3,6 +3,7 @@ mod config;
 mod db;
 mod error;
 mod gmail;
+mod idle;
 mod models;
 mod pexels;
 mod reminder;
@@ -35,6 +36,23 @@ pub fn run() {
             let conn = db::open(app.handle())?;
             app.manage(db::Db(std::sync::Mutex::new(conn)));
             app.manage(gmail::GmailState::default());
+
+            // Settle offline idle production once at startup; stash for the UI popup.
+            {
+                let state = app.state::<db::Db>();
+                let conn = state.0.lock().map_err(|e| e.to_string())?;
+                if let Ok(earned) = db::game::settle_idle(&conn, db::game::OFFLINE_CAP_SECS) {
+                    if earned > 0 {
+                        let prev = db::kv::get(&conn, "idle.offline_earned")
+                            .ok()
+                            .flatten()
+                            .and_then(|s| s.parse::<i64>().ok())
+                            .unwrap_or(0);
+                        let _ =
+                            db::kv::set(&conn, "idle.offline_earned", &(prev + earned).to_string());
+                    }
+                }
+            }
 
             {
                 use tauri_plugin_autostart::ManagerExt;
@@ -78,6 +96,7 @@ pub fn run() {
 
             tray::create(app.handle())?;
             reminder::spawn_loop(app.handle().clone());
+            idle::spawn_loop(app.handle().clone());
             let hidden = std::env::args().any(|a| a == "--hidden");
             if !hidden {
                 if let Some(w) = app.get_webview_window("main") {
@@ -102,6 +121,8 @@ pub fn run() {
             commands::todos::todo_list_today,
             commands::todos::todo_toggle_done,
             commands::game::game_get_profile,
+            commands::game::game_status,
+            commands::game::game_take_offline_earned,
             commands::backgrounds::config_has_key,
             commands::backgrounds::config_set_pexels_key,
             commands::backgrounds::bg_search,
