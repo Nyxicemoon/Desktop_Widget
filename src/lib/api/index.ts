@@ -165,17 +165,14 @@ export function dbImport(src: string): Promise<void> {
 }
 
 export interface AppEntry {
+  id: number;
   name: string;
-  launch_path: string;
   target: string;
   args: string | null;
-  is_custom: boolean;
-  category: string | null;
-  favorite: boolean;
 }
 
-export function appsScan(): Promise<AppEntry[]> {
-  return call<AppEntry[]>("apps_scan");
+export function appList(): Promise<AppEntry[]> {
+  return call<AppEntry[]>("app_list");
 }
 
 export function appIcon(path: string): Promise<string | null> {
@@ -190,14 +187,14 @@ export function appAddDropped(path: string): Promise<void> {
   return call<void>("app_add_dropped", { path });
 }
 
-export function appRemoveCustom(target: string): Promise<void> {
-  return call<void>("app_remove_custom", { target });
+export function appRemove(id: number): Promise<void> {
+  return call<void>("app_remove", { id });
 }
 
-export function appSetFavorite(target: string, favorite: boolean): Promise<void> {
-  return call<void>("app_set_favorite", { target, favorite });
+export function appRename(id: number, name: string): Promise<void> {
+  return call<void>("app_rename", { id, name });
 }
 
-export function appSetCategory(target: string, category: string | null): Promise<void> {
-  return call<void>("app_set_category", { target, category });
+export function appReorder(ids: number[]): Promise<void> {
+  return call<void>("app_reorder", { ids });
 }
