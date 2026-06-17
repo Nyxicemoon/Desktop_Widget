@@ -124,13 +124,79 @@ export function bgRestoreDefault(): Promise<void> {
   return call<void>("bg_restore_default");
 }
 
+export interface MailSummary {
+  id: string;
+  from: string;
+  subject: string;
+  date: string;
+  snippet: string;
+  unread: boolean;
+}
+
+export interface MailDetail {
+  id: string;
+  from: string;
+  to: string;
+  subject: string;
+  date: string;
+  body: string;
+  is_html: boolean;
+  unread: boolean;
+}
+
+export interface GmailStatus {
+  connected: boolean;
+  email: string | null;
+}
+
+export function gmailStatus(): Promise<GmailStatus> {
+  return call<GmailStatus>("gmail_status");
+}
+
+export function gmailConnect(): Promise<GmailStatus> {
+  return call<GmailStatus>("gmail_connect");
+}
+
+export function gmailDisconnect(): Promise<void> {
+  return call<void>("gmail_disconnect");
+}
+
+export function mailList(): Promise<MailSummary[]> {
+  return call<MailSummary[]>("mail_list");
+}
+
+export function mailSearch(query: string): Promise<MailSummary[]> {
+  return call<MailSummary[]>("mail_search", { query });
+}
+
+export function mailGet(id: string): Promise<MailDetail> {
+  return call<MailDetail>("mail_get", { id });
+}
+
+export function mailMarkRead(id: string, read: boolean): Promise<void> {
+  return call<void>("mail_mark_read", { id, read });
+}
+
+export function mailUnreadCount(): Promise<number> {
+  return call<number>("mail_unread_count");
+}
+
+export function configHasGoogle(): Promise<boolean> {
+  return call<boolean>("config_has_google");
+}
+
+export function configSetGoogle(id: string, secret: string): Promise<void> {
+  return call<void>("config_set_google", { id, secret });
+}
+
 export interface WidgetVisibility {
   todo: boolean;
   coins: boolean;
   apps: boolean;
+  mail: boolean;
 }
 
-export function widgetSetVisible(kind: "todo" | "coins" | "apps", visible: boolean): Promise<void> {
+export function widgetSetVisible(kind: "todo" | "coins" | "apps" | "mail", visible: boolean): Promise<void> {
   return call<void>("widget_set_visible", { kind, visible });
 }
 

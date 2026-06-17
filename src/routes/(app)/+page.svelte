@@ -18,6 +18,7 @@
   let widgetTodo = $state(false);
   let widgetCoins = $state(false);
   let widgetApps = $state(false);
+  let widgetMail = $state(false);
 
   onMount(async () => {
     void loadTodos();
@@ -25,13 +26,15 @@
     widgetTodo = v.todo;
     widgetCoins = v.coins;
     widgetApps = v.apps;
+    widgetMail = v.mail;
   });
 
-  async function toggleWidget(kind: "todo" | "coins" | "apps", on: boolean) {
+  async function toggleWidget(kind: "todo" | "coins" | "apps" | "mail", on: boolean) {
     await widgetSetVisible(kind, on);
     if (kind === "todo") widgetTodo = on;
     else if (kind === "coins") widgetCoins = on;
-    else widgetApps = on;
+    else if (kind === "apps") widgetApps = on;
+    else if (kind === "mail") widgetMail = on;
   }
 
   async function submitNew(e: Event) {
@@ -94,6 +97,14 @@
         onchange={(e) => toggleWidget("apps", e.currentTarget.checked)}
       />
       桌面应用组件 / Apps widget
+    </label>
+    <label>
+      <input
+        type="checkbox"
+        checked={widgetMail}
+        onchange={(e) => toggleWidget("mail", e.currentTarget.checked)}
+      />
+      桌面邮件组件 / Mail widget
     </label>
     <button class="notify-btn" onclick={() => sendTestNotification()}>
       🔔 发送测试通知 / Send test notification
