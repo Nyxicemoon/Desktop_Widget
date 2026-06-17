@@ -66,6 +66,9 @@ pub fn run() {
             if vis.coins {
                 let _ = window::open_widget(app.handle(), "coins");
             }
+            if vis.apps {
+                let _ = window::open_widget(app.handle(), "apps");
+            }
 
             tray::create(app.handle())?;
             reminder::spawn_loop(app.handle().clone());

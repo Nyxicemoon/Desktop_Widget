@@ -9,6 +9,7 @@ pub fn widget_config(kind: &str) -> AppResult<(&'static str, &'static str, f64, 
     match kind {
         "todo" => Ok(("widget-todo", "/widgets/todo", 280.0, 360.0, 40.0, 40.0)),
         "coins" => Ok(("widget-coins", "/widgets/coins", 200.0, 90.0, 360.0, 40.0)),
+        "apps" => Ok(("widget-apps", "/widgets/apps", 320.0, 220.0, 40.0, 420.0)),
         other => Err(AppError::Other(format!("unknown widget kind: {other}"))),
     }
 }
