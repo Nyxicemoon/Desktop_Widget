@@ -2,6 +2,7 @@ mod commands;
 mod config;
 mod db;
 mod error;
+mod gmail;
 mod models;
 mod pexels;
 mod reminder;
@@ -33,6 +34,7 @@ pub fn run() {
         .setup(|app| {
             let conn = db::open(app.handle())?;
             app.manage(db::Db(std::sync::Mutex::new(conn)));
+            app.manage(gmail::GmailState::default());
 
             {
                 use tauri_plugin_autostart::ManagerExt;
@@ -58,6 +60,7 @@ pub fn run() {
                     todo: false,
                     coins: false,
                     apps: false,
+                    mail: false,
                 })
             };
             if vis.todo {
@@ -68,6 +71,9 @@ pub fn run() {
             }
             if vis.apps {
                 let _ = window::open_widget(app.handle(), "apps");
+            }
+            if vis.mail {
+                let _ = window::open_widget(app.handle(), "mail");
             }
 
             tray::create(app.handle())?;
@@ -104,6 +110,16 @@ pub fn run() {
             commands::backgrounds::bg_restore_default,
             commands::backup::db_export,
             commands::backup::db_import,
+            commands::mail::config_has_google,
+            commands::mail::config_set_google,
+            commands::mail::gmail_status,
+            commands::mail::gmail_connect,
+            commands::mail::gmail_disconnect,
+            commands::mail::mail_list,
+            commands::mail::mail_search,
+            commands::mail::mail_get,
+            commands::mail::mail_mark_read,
+            commands::mail::mail_unread_count,
             commands::autostart::autostart_get,
             commands::autostart::autostart_set,
             commands::widget::widget_set_visible,

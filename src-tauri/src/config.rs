@@ -5,6 +5,10 @@ use std::path::Path;
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct AppConfig {
     pub pexels_api_key: Option<String>,
+    #[serde(default)]
+    pub google_client_id: Option<String>,
+    #[serde(default)]
+    pub google_client_secret: Option<String>,
 }
 
 pub fn load(dir: &Path) -> AppResult<AppConfig> {
@@ -46,6 +50,7 @@ mod tests {
         let dir = temp_dir();
         let cfg = AppConfig {
             pexels_api_key: Some("abc123".into()),
+            ..Default::default()
         };
         save(&dir, &cfg).unwrap();
         let loaded = load(&dir).unwrap();

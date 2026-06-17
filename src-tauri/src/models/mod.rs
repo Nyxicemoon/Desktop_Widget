@@ -66,6 +66,7 @@ pub struct WidgetVisibility {
     pub todo: bool,
     pub coins: bool,
     pub apps: bool,
+    pub mail: bool,
 }
 
 #[derive(Debug, Serialize)]
@@ -74,4 +75,32 @@ pub struct AppEntry {
     pub name: String,
     pub target: String,
     pub args: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct MailSummary {
+    pub id: String,
+    pub from: String,
+    pub subject: String,
+    pub date: String,
+    pub snippet: String,
+    pub unread: bool,
+}
+
+#[derive(Debug, Serialize)]
+pub struct MailDetail {
+    pub id: String,
+    pub from: String,
+    pub to: String,
+    pub subject: String,
+    pub date: String,
+    pub body: String,
+    pub is_html: bool,
+    pub unread: bool,
+}
+
+#[derive(Debug, Serialize)]
+pub struct GmailStatus {
+    pub connected: bool,
+    pub email: Option<String>,
 }

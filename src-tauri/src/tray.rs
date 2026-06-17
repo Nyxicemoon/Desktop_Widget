@@ -26,6 +26,7 @@ fn spawn_toggle(app: &AppHandle, kind: &'static str) {
                     "todo" => v.todo,
                     "coins" => v.coins,
                     "apps" => v.apps,
+                    "mail" => v.mail,
                     _ => false,
                 })
                 .unwrap_or(false)
@@ -39,8 +40,9 @@ pub fn create(app: &AppHandle) -> tauri::Result<()> {
     let todo = MenuItem::with_id(app, "toggle_todo", "Todo 组件", true, None::<&str>)?;
     let coins = MenuItem::with_id(app, "toggle_coins", "金币组件", true, None::<&str>)?;
     let apps = MenuItem::with_id(app, "toggle_apps", "显示/隐藏 应用 / Toggle Apps", true, None::<&str>)?;
+    let mail = MenuItem::with_id(app, "toggle_mail", "显示/隐藏 邮件 / Toggle Mail", true, None::<&str>)?;
     let quit = MenuItem::with_id(app, "quit", "退出 / Quit", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&show, &todo, &coins, &apps, &quit])?;
+    let menu = Menu::with_items(app, &[&show, &todo, &coins, &apps, &mail, &quit])?;
 
     let icon = tauri::image::Image::from_bytes(include_bytes!("../icons/128x128.png"))?;
 
@@ -54,6 +56,7 @@ pub fn create(app: &AppHandle) -> tauri::Result<()> {
             "toggle_todo" => spawn_toggle(app, "todo"),
             "toggle_coins" => spawn_toggle(app, "coins"),
             "toggle_apps" => spawn_toggle(app, "apps"),
+            "toggle_mail" => spawn_toggle(app, "mail"),
             "quit" => app.exit(0),
             _ => {}
         })
