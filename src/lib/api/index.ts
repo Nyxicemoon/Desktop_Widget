@@ -127,9 +127,10 @@ export function bgRestoreDefault(): Promise<void> {
 export interface WidgetVisibility {
   todo: boolean;
   coins: boolean;
+  apps: boolean;
 }
 
-export function widgetSetVisible(kind: "todo" | "coins", visible: boolean): Promise<void> {
+export function widgetSetVisible(kind: "todo" | "coins" | "apps", visible: boolean): Promise<void> {
   return call<void>("widget_set_visible", { kind, visible });
 }
 
@@ -161,4 +162,42 @@ export function dbExport(dest: string): Promise<void> {
 
 export function dbImport(src: string): Promise<void> {
   return call<void>("db_import", { src });
+}
+
+export interface AppEntry {
+  name: string;
+  launch_path: string;
+  target: string;
+  args: string | null;
+  is_custom: boolean;
+  category: string | null;
+  favorite: boolean;
+}
+
+export function appsScan(): Promise<AppEntry[]> {
+  return call<AppEntry[]>("apps_scan");
+}
+
+export function appIcon(path: string): Promise<string | null> {
+  return call<string | null>("app_icon", { path });
+}
+
+export function appLaunch(path: string): Promise<void> {
+  return call<void>("app_launch", { path });
+}
+
+export function appAddDropped(path: string): Promise<void> {
+  return call<void>("app_add_dropped", { path });
+}
+
+export function appRemoveCustom(target: string): Promise<void> {
+  return call<void>("app_remove_custom", { target });
+}
+
+export function appSetFavorite(target: string, favorite: boolean): Promise<void> {
+  return call<void>("app_set_favorite", { target, favorite });
+}
+
+export function appSetCategory(target: string, category: string | null): Promise<void> {
+  return call<void>("app_set_category", { target, category });
 }
