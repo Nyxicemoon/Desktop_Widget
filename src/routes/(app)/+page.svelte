@@ -17,18 +17,21 @@
   let reward = $state(0);
   let widgetTodo = $state(false);
   let widgetCoins = $state(false);
+  let widgetApps = $state(false);
 
   onMount(async () => {
     void loadTodos();
     const v = await widgetGetVisibility();
     widgetTodo = v.todo;
     widgetCoins = v.coins;
+    widgetApps = v.apps;
   });
 
-  async function toggleWidget(kind: "todo" | "coins", on: boolean) {
+  async function toggleWidget(kind: "todo" | "coins" | "apps", on: boolean) {
     await widgetSetVisible(kind, on);
     if (kind === "todo") widgetTodo = on;
-    else widgetCoins = on;
+    else if (kind === "coins") widgetCoins = on;
+    else widgetApps = on;
   }
 
   async function submitNew(e: Event) {
@@ -83,6 +86,14 @@
         onchange={(e) => toggleWidget("coins", e.currentTarget.checked)}
       />
       桌面金币组件 / Coins widget
+    </label>
+    <label>
+      <input
+        type="checkbox"
+        checked={widgetApps}
+        onchange={(e) => toggleWidget("apps", e.currentTarget.checked)}
+      />
+      桌面应用组件 / Apps widget
     </label>
     <button class="notify-btn" onclick={() => sendTestNotification()}>
       🔔 发送测试通知 / Send test notification
