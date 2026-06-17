@@ -41,4 +41,7 @@ windows = { version = "0.61", features = [
 ] }
 tauri-plugin-autostart = "2"
 tauri-plugin-dialog = "2"
+keyring = "3"
+sha2 = "0.10"
+getrandom = "0.2"
 

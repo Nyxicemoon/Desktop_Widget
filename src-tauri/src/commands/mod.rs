@@ -4,5 +4,6 @@ pub mod backup;
 pub mod backgrounds;
 pub mod game;
 pub mod kv;
+pub mod mail;
 pub mod todos;
 pub mod widget;

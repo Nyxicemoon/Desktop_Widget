@@ -10,6 +10,7 @@ pub fn widget_config(kind: &str) -> AppResult<(&'static str, &'static str, f64, 
         "todo" => Ok(("widget-todo", "/widgets/todo", 280.0, 360.0, 40.0, 40.0)),
         "coins" => Ok(("widget-coins", "/widgets/coins", 200.0, 90.0, 360.0, 40.0)),
         "apps" => Ok(("widget-apps", "/widgets/apps", 360.0, 280.0, 40.0, 420.0)),
+        "mail" => Ok(("widget-mail", "/widgets/mail", 200.0, 90.0, 580.0, 40.0)),
         other => Err(AppError::Other(format!("unknown widget kind: {other}"))),
     }
 }
@@ -19,6 +20,7 @@ pub fn read_visibility(conn: &Connection) -> AppResult<WidgetVisibility> {
         todo: kv::get(conn, "widget.todo.visible")?.as_deref() == Some("1"),
         coins: kv::get(conn, "widget.coins.visible")?.as_deref() == Some("1"),
         apps: kv::get(conn, "widget.apps.visible")?.as_deref() == Some("1"),
+        mail: kv::get(conn, "widget.mail.visible")?.as_deref() == Some("1"),
     })
 }
 
@@ -116,6 +118,7 @@ mod tests {
         assert!(!v.todo);
         assert!(!v.coins);
         assert!(!v.apps);
+        assert!(!v.mail);
     }
 
     #[test]
