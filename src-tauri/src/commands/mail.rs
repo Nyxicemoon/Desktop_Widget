@@ -85,10 +85,22 @@ pub async fn mail_get(app: AppHandle, id: String) -> AppResult<MailDetail> {
 }
 
 #[tauri::command]
-pub async fn mail_mark_read(app: AppHandle, id: String, read: bool) -> AppResult<()> {
-    tauri::async_runtime::spawn_blocking(move || api::mark_read(&app, &id, read))
+pub async fn mail_mark_read(
+    app: AppHandle,
+    db: State<'_, Db>,
+    id: String,
+    read: bool,
+) -> AppResult<()> {
+    let id2 = id.clone();
+    let app2 = app.clone();
+    tauri::async_runtime::spawn_blocking(move || api::mark_read(&app2, &id2, read))
         .await
-        .map_err(|e| AppError::Other(e.to_string()))?
+        .map_err(|e| AppError::Other(e.to_string()))??;
+    if read {
+        let conn = db.0.lock().map_err(|e| AppError::Other(e.to_string()))?;
+        let _ = crate::db::game::award_for_mail(&conn, &id, 2, 3);
+    }
+    Ok(())
 }
 
 #[tauri::command]

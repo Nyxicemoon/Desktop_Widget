@@ -104,3 +104,13 @@ pub struct GmailStatus {
     pub connected: bool,
     pub email: Option<String>,
 }
+
+#[derive(Debug, Serialize)]
+pub struct GameStatus {
+    pub coins: i64,
+    pub exp: i64,
+    pub level: i64,
+    pub exp_into_level: i64,
+    pub exp_for_next: i64,
+    pub rate_per_min: i64,
+}
